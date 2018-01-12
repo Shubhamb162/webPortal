@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.test.project2backend.dao.ClientDao;
@@ -24,106 +23,82 @@ public class ClientController {
 	private ClientDao clientDao;
 	private Client client;
 
-	@PostMapping("/addclient")
+	// -----------------Create a Client----------------------------------
+	@PostMapping("/addclient/")
 	public ResponseEntity<?> addclient(@RequestBody Client client) {
 		try {
 			clientDao.addClient(client);
 		} catch (Exception e) {
-			return new ResponseEntity<String>("client not added", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Client Not Added", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<String>("Client Added", HttpStatus.OK);
 	}
 
-	@GetMapping("/retriveclient/{id}")
-	public ResponseEntity<?> retriveclient(@PathVariable("id") Integer id) {
+	// -----------------Retrieve Single Client------------------------------
+	@GetMapping("/retrieveclient/{id}")
+	public ResponseEntity<Client> retrieveclient(@PathVariable("id") Integer id) {
 		try {
 			client = clientDao.getClient(id);
+			System.out.println(client.getClient_Name());
 		} catch (Exception e) {
-			return new ResponseEntity<String>("client not added", HttpStatus.INTERNAL_SERVER_ERROR);
+			// return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+			return new ResponseEntity<Client>(client, HttpStatus.OK);
 		}
-		System.out.println(client.getClient_Name());
-		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		// return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Client>(client, HttpStatus.OK);
 	}
-	/*
-	 * @PostMapping("/addclient") public @ResponseBody String
-	 * addclient(@RequestBody Client client) { if( clientDao.addClient(client))
-	 * { return "added successfully"; }else { return "falied"; } }
-	 */
-	/*
-	 * @GetMapping("/client") public ResponseEntity<?> listAllClients() {
-	 * System.out.println("i am in rest controller"); List<Client> clients =
-	 * clientDao.getALLClient();
-	 * 
-	 * if (clients.isEmpty()) { return new
-	 * ResponseEntity<List<Client>>(HttpStatus.NO_CONTENT);// You // many //
-	 * decide // to // return // HttpStatus.NOT_FOUND } return new
-	 * ResponseEntity<List<Client>>(clients, HttpStatus.OK);
-	 * 
-	 * }
-	 */
-	/*
-	 * @PostMapping(value = "/useradd/") public ResponseEntity<Void>
-	 * createUser(@RequestBody User_Domain user) {
-	 * System.out.println("Creating User " + user.getUname());
-	 * 
-	 * if (userDao.isExistingUser(user)) {
-	 * System.out.println("A User with name " + user.getUname() +
-	 * " already exist"); return new ResponseEntity<Void>(HttpStatus.CONFLICT);
-	 * }
-	 * 
-	 * userDao.addUser(user);
-	 * 
-	 * 
-	 * return new ResponseEntity<Void>(HttpStatus.CREATED); }
-	 * 
-	 * @PostMapping("/login") public ResponseEntity<User_Domain>
-	 * loginemail(@RequestBody User_Domain user) {
-	 * System.out.println("get the email id :"+user.getUname()); User_Domain
-	 * usere = userDao.getUsername(user.getUname(),user.getPassword());
-	 * if(usere!=null) { return new
-	 * ResponseEntity<User_Domain>(usere,HttpStatus.OK); } else { return new
-	 * ResponseEntity<User_Domain>(user,HttpStatus.UNAUTHORIZED); } } }
-	 */
 
-	/*
-	 * @Autowired private ClientDao clientDao;
-	 * 
-	 * @RequestMapping("/getClient/{id}") public ResponseEntity
-	 * getClient(@PathVariable("id") Integer id) {
-	 * 
-	 * Client client = clientDao.getClient(id); if (client == null) { return new
-	 * ResponseEntity("No Client found for ID " + id, HttpStatus.NOT_FOUND); }
-	 * 
-	 * return new ResponseEntity(client, HttpStatus.OK); }
-	 */
+	// ------------------- Update a Client -------------------------------
+	@RequestMapping(value = "/updateclient/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<Client> updateclient(@PathVariable("id") Integer id, @RequestBody Client modifiedclient) {
+		System.out.println("Updating Client " + id);
 
-	/*
-	 * * @PostMapping(value = "/clients") public ResponseEntity
-	 * createClient(@RequestBody Client client) {
-	 * 
-	 * clientDAO.create(client);
-	 * 
-	 * return new ResponseEntity(client, HttpStatus.OK); }
-	 * 
-	 * @DeleteMapping("/clients/{id}") public ResponseEntity
-	 * deleteClient(@PathVariable Long id) {
-	 * 
-	 * if (null == clientDAO.delete(id)) { return new
-	 * ResponseEntity("No Client found for ID " + id, HttpStatus.NOT_FOUND); }
-	 * 
-	 * return new ResponseEntity(id, HttpStatus.OK);
-	 * 
-	 * }
-	 * 
-	 * @PutMapping("/clients/{id}") public ResponseEntity
-	 * updateClient(@PathVariable Long id, @RequestBody Client client) {
-	 * 
-	 * client = clientDAO.update(id, client);
-	 * 
-	 * if (null == client) { return new ResponseEntity("No Client found for ID "
-	 * + id, HttpStatus.NOT_FOUND); }
-	 * 
-	 * return new ResponseEntity(client, HttpStatus.OK); }
-	 */
+		client = clientDao.getClient(id);
 
+		if (client == null) {
+			System.out.println("Client with id " + id + " not found");
+			return new ResponseEntity<Client>(HttpStatus.NOT_FOUND);
+		}
+
+		client.setClient_Name(modifiedclient.getClient_Name());
+		client.setClient_Email_Id(modifiedclient.getClient_Email_Id());
+		client.setClient_Mobile_No(modifiedclient.getClient_Mobile_No());
+		client.setClient_Password(modifiedclient.getClient_Password());
+		client.setClient_Confirm_Password(modifiedclient.getClient_Confirm_Password());
+		client.setRole(modifiedclient.getRole());
+
+		clientDao.updateClient(client);
+		return new ResponseEntity<Client>(client, HttpStatus.OK);
+	}
+
+	// ---------------------Delete a Client--------------------------------
+	@RequestMapping(value = "/deleteclient/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<?> deleteclient(@PathVariable("id") Integer id) {
+		System.out.println("Fetching & Deleting User with id " + id);
+
+		client = clientDao.getClient(id);
+
+		if (client == null) {
+			System.out.println("Unable to delete. Client with id " + id + " not found");
+			return new ResponseEntity<String>("NO client with given id", HttpStatus.NOT_FOUND);
+		}
+
+		clientDao.deleteClient(client);
+		return new ResponseEntity<String>("Client Deleted", HttpStatus.NO_CONTENT);
+	}
+
+	// ---------------------Retrieve All Clients-----------------------------
+	@RequestMapping(value = "/client/", method = RequestMethod.GET)
+	public ResponseEntity<List<Client>> listAllClient() {
+		List<Client> clients = clientDao.getALLClient();
+		if (clients.isEmpty()) {
+			return new ResponseEntity<List<Client>>(HttpStatus.NO_CONTENT);// You
+																			// many
+																			// decide
+																			// to
+																			// return
+																			// HttpStatus.NOT_FOUND
+		}
+		return new ResponseEntity<List<Client>>(clients, HttpStatus.OK);
+	}
 }
