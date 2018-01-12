@@ -34,11 +34,25 @@ public class ClientController {
 		return new ResponseEntity<String>("Client Added", HttpStatus.OK);
 	}
 
-	// -----------------Retrieve Single Client------------------------------
+	// -----------------Retrieve Single Client by Id-------------------------
 	@GetMapping("/retrieveclient/{id}")
-	public ResponseEntity<Client> retrieveclient(@PathVariable("id") Integer id) {
+	public ResponseEntity<Client> retrieveclientById(@PathVariable("id") Integer id) {
 		try {
 			client = clientDao.getClient(id);
+			System.out.println(client.getClient_Name());
+		} catch (Exception e) {
+			// return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+			return new ResponseEntity<Client>(client, HttpStatus.OK);
+		}
+		// return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Client>(client, HttpStatus.OK);
+	}
+
+	// -----------------Retrieve Single Client by Email Id--------------------------
+	@GetMapping("/retrieveclient/{emailId}")
+	public ResponseEntity<Client> retrieveclientByEmailId(@PathVariable("emailId") String emailId) {
+		try {
+			client = clientDao.getClient("shubham57@gmail.com");
 			System.out.println(client.getClient_Name());
 		} catch (Exception e) {
 			// return new ResponseEntity<Boolean>(true, HttpStatus.OK);
